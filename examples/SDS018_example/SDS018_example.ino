@@ -1,31 +1,33 @@
-// SDS011 dust sensor example
+// SDS018 dust sensor
 // -----------------------------
 //
-// By R. Zschiegner (rz@madavi.de).
-// April 2016
+// By L. Zhang (zhanglin.edu@outlook.com).
+// August 2021
 
-#ifdef ESP32
-#error ESP32 does not work with SoftSerial, use HardwareSerial example instead
-#endif
-
+// 用排线连接：
+// SDS018 --> Arduino对应管脚
+//    TXD     D10
+//    RXD     D11
+//    GND     GND
+//     5V     VCC/5V
 
 #include <SDS018.h>
 
-float p10, p25;
-int error;
-
-SDS011 my_sds;
+SDS018 mySDS;
+SoftwareSerial mySerial(10, 11); //Pin 11 == RX, Pin 10 == TX
 
 void setup() {
-	my_sds.begin(D1, D2); //RX, TX
-	Serial.begin(9600);
+  mySerial.begin(9600);
+  mySDS.begin(&mySerial);
+  Serial.begin(9600);
 }
+float pm2_5 = -1.0, pm10 = -1.0;
 
 void loop() {
-	error = my_sds.read(&p25, &p10);
-	if (!error) {
-		Serial.println("P2.5: " + String(p25));
-		Serial.println("P10:  " + String(p10));
-	}
-	delay(100);
+  int len = 0;
+  mySDS.query();
+  mySDS.read_float(&pm2_5, &pm10);
+  Serial.println("PM 2.5: " + String(pm2_5));
+  Serial.println("PM 10 :  " + String(pm10));
+  delay(1000);
 }
